@@ -1,0 +1,13 @@
+.calc {
+	color: whitesmoke;
+	background: linear-gradient(-90deg, #06345f, #00162a);
+	height: 100vh;
+	&-btn {
+		width: 20px;
+		height: 20px;
+		margin: 6px;
+        &-clear{
+            width: 100px;
+        }
+	}
+}

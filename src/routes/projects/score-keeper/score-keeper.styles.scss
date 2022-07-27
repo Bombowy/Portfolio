@@ -1,0 +1,12 @@
+h1{
+    color:whitesmoke;
+}
+
+.score{
+    color:#fffb00;
+    &-keeper{
+        background: linear-gradient(-90deg, #06345f, #00162a);;
+        height: 100vh;
+
+    }
+}

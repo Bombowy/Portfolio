@@ -1,0 +1,59 @@
+.home {
+	background: linear-gradient(-90deg, #06345f, #00162a);
+	clip-path: polygon(0 0, 100% 0, 100% 80%, 40% 100%, 0 85%);
+	color: whitesmoke;
+	padding-top: 50px;
+	text-align: center;
+    height: 600px;
+
+	&-section {
+        width: 90%;
+		max-width: 1000px;
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+		margin: 20px auto 30px auto;
+        
+
+		&-text,
+		&-image {
+			width: 40%;
+		}
+		&-text {
+			font-family: "Ubuntu";
+			font-weight: 700;
+			font-size: 1.4rem;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+
+			span {
+				padding: 15px 0;
+			}
+
+			&-name {
+				color: #fffb00;
+				font-size: 1.6rem;
+			}
+			&-enthusiastic {
+				font-family: sans-serif;
+				font-size: 2.6rem;
+			}
+			&-subheading {
+				font-family: "Open Sans";
+			}
+		}
+        
+            .myImage {
+                height: 470px;
+                display: flex;
+                justify-content: center;
+                overflow: hidden;
+                border-radius: 50%;
+            
+            
+        }
+		
+		
+	}
+}

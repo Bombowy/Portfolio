@@ -1,0 +1,21 @@
+.shopping{
+	background: linear-gradient(-90deg, #06345f, #00162a);
+	height: 200vh;
+
+&-cart {
+	display: flex;
+	justify-content: center;
+	justify-content: space-evenly;
+	padding: 50px;
+    color: whitesmoke;
+	&-btn {
+		width: 20px;
+		height: 20px;
+		margin: 6px;
+	}
+}
+}
+
+.total{
+    color:#fffb00;
+}

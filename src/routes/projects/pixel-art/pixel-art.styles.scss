@@ -1,0 +1,23 @@
+.pixel {
+	height: 20px;
+	width: 20px;
+	margin: 1px;
+	cursor: pointer;
+}
+.tab {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+	width: 210px;
+    margin: 0;
+    justify-content: center;
+    cursor: pointer;
+}
+.pixelart{
+
+	height: 100vh;
+	background: linear-gradient(-90deg, #06345f, #00162a);;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}

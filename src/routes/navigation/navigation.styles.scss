@@ -1,0 +1,35 @@
+.navigation {
+	height: 90px;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	padding: 0 25px;
+	background: linear-gradient(-90deg, #06345f, #00162a);
+	font-size: 1.3rem;
+
+	.logo-container {
+		height: 100%;
+		width: 250px;
+		padding: 15px;
+	}
+	.logo {
+		padding: 10px 15px;
+		cursor: pointer;
+		color: whitesmoke;
+		font-size: 2rem;
+		font-family: "Oswald";
+	}
+	.nav-links-container {
+		width: 50%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+
+		.nav-link {
+			padding: 10px 15px;
+			cursor: pointer;
+			color: whitesmoke;
+		}
+	}
+}

@@ -1,0 +1,46 @@
+.button-container {
+	font-size: 1.3rem;
+	font-family: "Ubuntu";
+	color: whitesmoke;
+	border-radius: 25px;
+	margin-inline: 12px;
+	padding: 5px 40px;
+	border: 2px solid whitesmoke;
+	transition: all 0.3s ease-in-out;
+
+	&.transparent {
+		background: transparent;
+		animation: Animation 3.5s ease-in-out 3s infinite;
+
+		&:hover {
+			transform: translateY(-5px);
+			background-color: #fffb00;
+			color: #1c1c1c;
+		}
+	}
+
+	&.red {
+		background-color: red;
+
+		&:hover {
+			transform: translateY(-5px);
+		}
+	}
+}
+@keyframes Animation {
+	0% {
+		transform: scale(1);
+	}
+	40% {
+		transform: scale(1);
+	}
+  50% {
+		transform: scale(1.1);
+	}
+	60% {
+		transform: scale(1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}

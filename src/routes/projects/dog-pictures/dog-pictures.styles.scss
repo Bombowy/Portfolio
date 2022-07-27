@@ -1,0 +1,9 @@
+.dog{
+    width: 300px;
+    overflow: hidden;
+    &-pics{
+        background: linear-gradient(-90deg, #06345f, #00162a);
+        height: 100vh;
+
+    }
+}
