@@ -1,0 +1,14 @@
+.games{
+background: linear-gradient(-90deg, #06345f, #00162a);
+clip-path: polygon(0 0, 100% 0, 100% 80%, 40% 100%, 0 85%);
+    &-container{
+    width: 80vw;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin:auto;
+    padding: 100px 0;
+    flex-wrap: wrap;
+
+}
+}

@@ -13,6 +13,9 @@ const Navigation = () => {
 					<Link className='nav-link' to='/projects'>
 						PROJEKTY
 					</Link>
+					<Link className='nav-link' to='/games'>
+						GRY
+					</Link>
 					
 					
 				</div>

@@ -13,6 +13,7 @@ import ScoreKeeper from "./routes/projects/score-keeper/score-keeper.component"
 import PixelArt from "./routes/projects/pixel-art/pixel-art.component"
 import SimpleCalculator from "./routes/projects/simple-calculator/simple-calculator.component"
 import ShoppingCart from "./routes/projects/shopping-cart/shopping-cart.component"
+import Games from "./routes/games/games.component"
 
 const App = () => {
 	return (
@@ -20,6 +21,7 @@ const App = () => {
 			<Route path='/' element={<Navigation />}>
 				<Route index element={<Home />} />
 				<Route path='projects' element={<Projects />} />
+				<Route path='games' element={<Games />} />
 				<Route path='projects/color-renderer' element={<ColorRenderer />} />
 				<Route path='projects/dark-mode' element={<DarkMode />} />
 				<Route path='projects/form-validator' element={<FormValidator />} />
