@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task List</title>
+</head>
+<body>
+    <h1>All Tasks</h1>
+    {% if tasks %}
+        <ul>
+            {% for task in tasks %}
+                <li>
+                    <a href="/tasks/task/{{ task.id }}/">{{ task.title }}</a> - {{ task.description }}
+                    <a href="/tasks/task/{{ task.id }}/edit/">Edit</a>
+                   <form action="/tasks/task/{{ task.id }}/delete/" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this task?');">Delete</button>
+                   </form>
+
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tasks available. <a href="#">Add a new task</a></p>
+    {% endif %}
+    <a href="/tasks/">Back to Home</a>
+    <script src="{% static 'js/confirm_delete.js' %}"></script>
+</body>
+</html>
