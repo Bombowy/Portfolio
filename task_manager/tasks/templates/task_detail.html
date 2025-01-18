@@ -6,6 +6,11 @@
     <title>Task Details</title>
 </head>
 <body>
+<form action="{% url 'logout' %}" method="POST">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+
     <h1>Task Details</h1>
     <h2>{{ task.title }}</h2>
     <p><strong>Description:</strong> {{ task.description }}</p>

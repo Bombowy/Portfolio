@@ -7,6 +7,11 @@
     <title>Task List</title>
 </head>
 <body>
+<form action="{% url 'logout' %}" method="POST">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+
     <h1>All Tasks</h1>
     {% if tasks %}
         <ul>
@@ -22,9 +27,9 @@
                 </li>
             {% endfor %}
         </ul>
-    {% else %}
-        <p>No tasks available. <a href="#">Add a new task</a></p>
     {% endif %}
+<a href="{% url 'create_task' %}" class="btn">Create Task</a>
+
     <a href="/tasks/">Back to Home</a>
     <script src="{% static 'js/confirm_delete.js' %}"></script>
 </body>
