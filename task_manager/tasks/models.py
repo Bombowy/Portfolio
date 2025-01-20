@@ -3,45 +3,39 @@ from django.contrib.auth.models import User
 
 
 # Enum for task statuses
-class TaskStatus(models.TextChoices):
-    TODO = 'todo', 'To Do'
-    IN_PROGRESS = 'in_progress', 'In Progress'
-    DONE = 'done', 'Done'
+
+class TaskStatus(models.Model):
+    code = models.PositiveSmallIntegerField(primary_key=True)  # Używamy code jako klucz główny
+    name = models.CharField(max_length=50)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Task(models.Model):
-
     title = models.CharField(max_length=200)
-
-
     description = models.TextField(blank=True)
-
-
     due_date = models.DateField(null=True, blank=True)
-
-
-    status = models.CharField(
-        max_length=20,
-        choices=TaskStatus.choices,
-        default=TaskStatus.TODO
+    status = models.ForeignKey(
+        TaskStatus,
+        on_delete=models.PROTECT,
+        related_name='tasks',
+        default=0  # Domyślna wartość, odnosi się teraz do pola `code`
     )
-
-    # User assigned to the task (optional)
     assigned_to = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,  # If the user is deleted, keep the task but remove the assignment
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='tasks'
     )
-
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-
         return self.title
+
 
 
 class Comment(models.Model):
