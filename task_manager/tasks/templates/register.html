@@ -7,11 +7,32 @@
 </head>
 <body>
     <h1>Register</h1>
+
+    <!-- Obsługa wiadomości -->
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!-- Obsługa błędów formularza -->
+    {% if form.errors %}
+        <ul>
+            {% for field, errors in form.errors.items %}
+                <li>{{ field }}: {{ errors|join:", " }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!-- Formularz rejestracji -->
     <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Register</button>
     </form>
+
     <a href="{% url 'login' %}">Already have an account? Log in</a>
 </body>
 </html>
