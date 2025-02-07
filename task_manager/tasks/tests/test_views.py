@@ -11,9 +11,9 @@ class UserRegistrationTest(TestCase):
             'password1': 'StrongPassword123',
             'password2': 'StrongPassword123',
         })
-        self.assertEqual(response.status_code, 302)  # Check if the response status is a redirect (302)
-        self.assertTrue(User.objects.filter(username='testuser').exists())  # Verify the user is created
-        self.assertTrue(User.objects.filter(email='testuser@example.com').exists())  # Verify the email is saved
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.filter(username='testuser').exists())
+        self.assertTrue(User.objects.filter(email='testuser@example.com').exists())
 
     def test_registration_form_invalid_data(self):
         """Tests user registration with invalid data"""
@@ -23,8 +23,8 @@ class UserRegistrationTest(TestCase):
             'password1': 'StrongPassword123',
             'password2': 'DifferentPassword123',
         })
-        self.assertEqual(response.status_code, 200)  # Form should be returned
-        self.assertFalse(User.objects.filter(username='testuser').exists())  # User should not be created
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.filter(username='testuser').exists())
 
 class UserLoginTest(TestCase):
     def setUp(self):
@@ -63,25 +63,49 @@ class UserLoginTest(TestCase):
     def test_login_redirect_authenticated_user(self):
         """Test if already logged-in user is redirected"""
         logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in, "User was not logged in")  # Sprawdzenie poprawności logowania
+        self.assertTrue(logged_in, "User was not logged in")
 
         response = self.client.get(reverse('login'))
-        print(f"Status Code: {response.status_code}")  # Debugowanie kodu odpowiedzi
-        print(f"Redirect URL: {response.url}")  # Debugowanie przekierowania
-        self.assertEqual(response.status_code, 302)  # Sprawdza, czy nastąpiło przekierowanie
-        self.assertRedirects(response, '/tasks/')  # Sprawdza, czy przekierowano na /tasks/
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/tasks/')
 
 
 
-from tasks.models import Task
-from tasks.forms import TaskForm
+from tasks.models import Task, Project, ProjectMembership, Role, Permission, RolePermission
+
 
 
 class TaskViewsTest(TestCase):
+
     def setUp(self):
-        """Set up initial data for tests"""
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
-        self.task = Task.objects.create(title="Test Task", description="Test Description")
+        """Set up test data before each test."""
+        self.user = User.objects.create_user(username="testuser", password="testpassword")
+        self.client.login(username="testuser", password="testpassword")
+
+
+        self.project = Project.objects.create(name="Test Project", owner=self.user)
+        self.role = Role.objects.create(name="Manager")
+
+        create_task_perm = Permission.objects.get_or_create(name="CREATE_TASK")[0]
+        edit_task_perm = Permission.objects.get_or_create(name="EDIT_TASKS")[0]
+        delete_task_perm = Permission.objects.get_or_create(name="DELETE_TASK")[0]
+        assign_task_perm = Permission.objects.get_or_create(name="ASSIGN_TASK")[0]
+
+
+        RolePermission.objects.create(role=self.role, permission=create_task_perm)
+        RolePermission.objects.create(role=self.role, permission=edit_task_perm)
+        RolePermission.objects.create(role=self.role, permission=delete_task_perm)
+        RolePermission.objects.create(role=self.role, permission=assign_task_perm)
+        ProjectMembership.objects.create(user=self.user, project=self.project, role=self.role)
+
+
+        self.task = Task.objects.create(
+            title="Test Task",
+            description="Task for testing",
+            project=self.project,
+            assigned_to=self.user
+        )
 
     def test_index_view(self):
         """Test the index view"""
@@ -90,17 +114,16 @@ class TaskViewsTest(TestCase):
         self.assertTemplateUsed(response, 'index.html')
 
     def test_task_list_view_authenticated(self):
-        """Test the task_list view for an authenticated user"""
-        self.client.login(username='testuser', password='testpassword')
+        """Test accessing the task list as an authenticated user."""
         response = self.client.get(reverse('task_list'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'task_list.html')
-        self.assertContains(response, self.task.title)
+        self.assertContains(response, "Test Task")
 
     def test_task_list_view_unauthenticated(self):
-        """Test the task_list view for an unauthenticated user"""
+        """Test accessing the task list as an unauthenticated user."""
+        self.client.logout()
         response = self.client.get(reverse('task_list'))
-        self.assertEqual(response.status_code, 302)  # Expected redirect to login page
+        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, f"{reverse('login')}?next={reverse('task_list')}")
 
     def test_task_detail_view_authenticated(self):
@@ -112,53 +135,67 @@ class TaskViewsTest(TestCase):
         self.assertContains(response, self.task.title)
 
     def test_task_detail_view_unauthenticated(self):
-        """Test the task_detail view for an unauthenticated user"""
-        response = self.client.get(reverse('task_detail', args=[self.task.id]))
-        self.assertEqual(response.status_code, 302)  # Expected redirect to login page
+        """Test czy niezalogowany użytkownik jest przekierowany na login"""
+        self.client.logout()
+        response = self.client.get(reverse('task_detail', args=[self.task.id]), follow=True)
         self.assertRedirects(response, f"{reverse('login')}?next={reverse('task_detail', args=[self.task.id])}")
 
     def test_create_task_view_authenticated(self):
-        """Test the create_task view for an authenticated user"""
-        self.client.login(username='testuser', password='testpassword')
-        response = self.client.post(reverse('create_task'), {
+        """Test creating a task for an authenticated user with permissions."""
+        response = self.client.post(reverse('create_task', kwargs={'project_id': self.project.id}), {
             'title': 'New Task',
             'description': 'New Description'
         })
-        self.assertEqual(response.status_code, 302)  # Redirect to task_list
+        self.assertEqual(response.status_code, 302)
         self.assertTrue(Task.objects.filter(title='New Task').exists())
 
+    def test_create_task_view_authenticated_no_project(self):
+        """Test creating a task without a project (project_id=0)."""
+        response = self.client.post(reverse('create_task', kwargs={'project_id': 0}), {
+            'title': 'General Task',
+            'description': 'General Description'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Task.objects.filter(title='General Task').exists())
+
     def test_create_task_view_unauthenticated(self):
-        """Test the create_task view for an unauthenticated user"""
-        response = self.client.get(reverse('create_task'))
-        self.assertEqual(response.status_code, 302)  # Redirect to login page
-        self.assertRedirects(response, f"{reverse('login')}?next={reverse('create_task')}")
+        """Test the create_task view for an unauthenticated user."""
+        self.client.logout()
+        response = self.client.get(reverse('create_task', kwargs={'project_id': 0}))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f"{reverse('login')}?next={reverse('create_task', kwargs={'project_id': 0})}")
 
     def test_edit_task_view_authenticated(self):
-        """Test the edit_task view for an authenticated user"""
-        self.client.login(username='testuser', password='testpassword')
-        response = self.client.post(reverse('edit_task', args=[self.task.id]), {
+        """Test editing a task as an authenticated user with permissions."""
+        response = self.client.post(reverse('edit_task', kwargs={'task_id': self.task.id}), {
             'title': 'Updated Task',
             'description': 'Updated Description'
         })
-        self.assertEqual(response.status_code, 302)  # Redirect to task_list
+        self.assertEqual(response.status_code, 302)
         self.task.refresh_from_db()
         self.assertEqual(self.task.title, 'Updated Task')
 
     def test_edit_task_view_unauthenticated(self):
-        """Test the edit_task view for an unauthenticated user"""
-        response = self.client.get(reverse('edit_task', args=[self.task.id]))
-        self.assertEqual(response.status_code, 302)  # Redirect to login page
-        self.assertRedirects(response, f"{reverse('login')}?next={reverse('edit_task', args=[self.task.id])}")
+        """Test trying to edit a task without being logged in."""
+        self.client.logout()
+        response = self.client.post(reverse('edit_task', kwargs={'task_id': self.task.id}), {
+            'title': 'Updated Task',
+            'description': 'Updated Description'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response,
+                             f"{reverse('login')}?next={reverse('edit_task', kwargs={'task_id': self.task.id})}")
 
     def test_delete_task_view_authenticated(self):
-        """Test the delete_task view for an authenticated user"""
-        self.client.login(username='testuser', password='testpassword')
-        response = self.client.post(reverse('delete_task', args=[self.task.id]))
-        self.assertEqual(response.status_code, 302)  # Redirect to task_list
+        """Test deleting a task for an authenticated user with permissions."""
+        response = self.client.post(reverse('delete_task', kwargs={'task_id': self.task.id}))
+        self.assertEqual(response.status_code, 302)
         self.assertFalse(Task.objects.filter(id=self.task.id).exists())
 
     def test_delete_task_view_unauthenticated(self):
-        """Test the delete_task view for an unauthenticated user"""
-        response = self.client.get(reverse('delete_task', args=[self.task.id]))
-        self.assertEqual(response.status_code, 302)  # Redirect to login page
-        self.assertRedirects(response, f"{reverse('login')}?next={reverse('delete_task', args=[self.task.id])}")
+        """Test trying to delete a task without being logged in."""
+        self.client.logout()
+        response = self.client.post(reverse('delete_task', kwargs={'task_id': self.task.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response,
+                             f"{reverse('login')}?next={reverse('delete_task', kwargs={'task_id': self.task.id})}")

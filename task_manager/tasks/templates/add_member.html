@@ -1,0 +1,55 @@
+{% load static custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Member to Project</title>
+</head>
+<body>
+
+<h2>Add Member to Project: {{ project.name }}</h2>
+
+<a href="{% url 'project_task_list' project.id %}">← Back to Project Tasks</a>
+
+
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li style="color: {% if message.tags == 'success' %}green{% else %}red{% endif %};">
+                {{ message }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+
+<form method="POST">
+    {% csrf_token %}
+
+
+    <label for="username">Select a friend to add:</label>
+    <select id="username" name="username" required>
+        {% for friend in friends %}
+            <option value="{{ friend.username }}">{{ friend.username }}</option>
+        {% empty %}
+            <option disabled>No friends available to add.</option>
+        {% endfor %}
+    </select>
+
+
+    <label for="role">Assign a role:</label>
+    <select id="role" name="role" required>
+        {% for role in roles %}
+            <option value="{{ role.id }}">{{ role.name }}</option>
+        {% empty %}
+            <option disabled>No roles available.</option>
+        {% endfor %}
+    </select>
+
+
+    <button type="submit">Add Member</button>
+</form>
+
+</body>
+</html>

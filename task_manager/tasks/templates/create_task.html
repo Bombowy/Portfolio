@@ -6,17 +6,27 @@
     <title>Create Task</title>
 </head>
 <body>
-<form action="{% url 'logout' %}" method="POST">
+
+<h1>Create a New Task</h1>
+<form method="POST">
     {% csrf_token %}
-    <button type="submit">Logout</button>
+    {{ form.as_p }}
+
+
+    {% if project %}
+        <label for="assigned_to">Assign to:</label>
+        <select name="assigned_to" id="assigned_to">
+            <option value="">-- Select a user --</option>
+            {% for member in project_members %}
+                <option value="{{ member.id }}">{{ member.username }}</option>
+            {% endfor %}
+        </select>
+    {% endif %}
+
+    <button type="submit">Save Task</button>
 </form>
 
-    <h1>Create a New Task</h1>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save Task</button>
-    </form>
-    <a href="/tasks/list">Back to Task List</a>
+<a href="{% url 'task_list' %}">Back to Task List</a>
+
 </body>
 </html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Project</title>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+    {% with user_role=user.project_roles.first.role %}
+        {% if "EDIT_PROJECT" in user_role.permissions.values_list("name", flat=True) %}
+
+            <h2>Create a New Project</h2>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Create Project</button>
+            </form>
+
+        {% else %}
+            <p>You do not have permission to create projects.</p>
+        {% endif %}
+    {% endwith %}
+{% else %}
+    <p>You must be logged in to create a project.</p>
+{% endif %}
+
+<a href="{% url 'task_list' %}">← Back to Task List</a>
+
+</body>
+</html>

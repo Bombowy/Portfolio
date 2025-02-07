@@ -2,21 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Task</title>
 </head>
 <body>
-<form action="{% url 'logout' %}" method="POST">
+
+<h2>Edit Task</h2>
+
+<form method="POST">
     {% csrf_token %}
-    <button type="submit">Logout</button>
+    {{ form.as_p }}
+
+    {% if project and can_assign %}
+        <label for="assigned_to_id">Reassign Task:</label>
+        <select name="assigned_to" id="assigned_to_id">
+            {% for member in project_members %}
+                <option value="{{ member.id }}" {% if member == task.assigned_to %}selected{% endif %}>
+                    {{ member.username }}
+                </option>
+            {% endfor %}
+        </select>
+    {% elif not project %}
+
+        <input type="hidden" name="assigned_to" value="{{ request.user.id }}">
+        <p><strong>Assigned to:</strong> {{ task.assigned_to.username }}</p>
+    {% endif %}
+
+    <button type="submit">Save Changes</button>
 </form>
 
-    <h1>Edit Task</h1>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save Changes</button>
-    </form>
-    <a href="/tasks/list">Back to Task List</a>
+
+{% if project %}
+    <a href="{% url 'project_task_list' project.id %}">← Back to Project</a>
+{% endif %}
+    <a href="{% url 'task_list' %}">← Back to Task List</a>
+
+
 </body>
 </html>
