@@ -4,12 +4,6 @@
 *.sql
 
 
-
-
-*/migrations/*.py
-!*/migrations/__init__.py
-
-
 *.log
 
 
