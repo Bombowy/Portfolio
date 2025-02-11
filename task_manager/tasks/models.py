@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.core.exceptions import ValidationError
 
 class TaskStatus(models.Model):
     code = models.PositiveSmallIntegerField(primary_key=True)
@@ -88,39 +88,42 @@ class Permission(models.Model):
 
 
 
-class Role(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+class ProjectRole(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="roles", null=True, blank=True,)
+    name = models.CharField(max_length=50)
+    permissions = models.ManyToManyField("Permission", through="RolePermission", related_name="project_roles")
 
     class Meta:
-        db_table = 'tasks_role'
-
+        unique_together = ("project", "name")
+        db_table = 'tasks_project_role'
     def __str__(self):
-        return self.name
-
+        return f"{self.name} ({self.project.name})"
 
 class RolePermission(models.Model):
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='permissions')
-    permission = models.ForeignKey(Permission, on_delete=models.CASCADE, related_name='roles')
+    role = models.ForeignKey(ProjectRole, on_delete=models.CASCADE, related_name="role_permissions")
+    permission = models.ForeignKey("Permission", on_delete=models.CASCADE, related_name="role_permissions")
 
     class Meta:
         unique_together = ('role', 'permission')
         db_table = 'tasks_role_permission'
 
     def __str__(self):
-        return f"{self.role.name} - {self.permission.name}"
+        return f"{self.role.name} - {self.permission.name} ({self.role.project.name})"
 
 
 class ProjectMembership(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_roles')
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='memberships')
-    role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name='project_roles')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="project_memberships")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="memberships")
+    role = models.ForeignKey(ProjectRole, on_delete=models.PROTECT, related_name="memberships")
 
     class Meta:
-        unique_together = ('user', 'project')
-        db_table = 'tasks_project_membership'
+        unique_together = ("user", "project")
+        db_table = "tasks_project_membership"
 
     def __str__(self):
         return f"{self.user.username} - {self.role.name} in {self.project.name}"
+
+
 
 
 class Friendship(models.Model):
@@ -135,3 +138,16 @@ class Friendship(models.Model):
     def __str__(self):
         status = "Accepted" if self.accepted else "Pending"
         return f"{self.user.username} → {self.friend.username} ({status})"
+
+    def clean(self):
+        """Ensure that a user cannot add themselves as a friend."""
+        if self.user == self.friend:
+            raise ValidationError("You cannot add yourself as a friend.")
+
+    def save(self, *args, **kwargs):
+        """Call clean() before saving to enforce validation."""
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+

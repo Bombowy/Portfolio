@@ -11,7 +11,7 @@
     <button type="submit">Logout</button>
 </form>
 
-    <h1>Welcome to Task Manager</h1>
+    <h1>Welcome {{ request.user.username }} to Task Manager</h1>
     <p>This is the homepage of your Task Manager app!</p>
     <a href="/tasks/list">View all tasks</a>
 </body>

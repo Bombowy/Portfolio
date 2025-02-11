@@ -1,3 +1,4 @@
+{% load static custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,15 +7,88 @@
     <title>Task Details</title>
 </head>
 <body>
-<form action="{% url 'logout' %}" method="POST">
-    {% csrf_token %}
-    <button type="submit">Logout</button>
-</form>
+    <form action="{% url 'logout' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
 
     <h1>Task Details</h1>
     <h2>{{ task.title }}</h2>
+
+    {% if task.project %}
+        <p><strong>Project:</strong> {{ task.project.name }}</p>
+    {% else %}
+        <p><strong>Project:</strong> None (General Task)</p>
+    {% endif %}
+
     <p><strong>Description:</strong> {{ task.description }}</p>
     <p><strong>Created At:</strong> {{ task.created_at }}</p>
-    <a href="/tasks/list">Back to Task List</a>
+
+    <hr>
+
+    <h3>Comments</h3>
+    {% if comments %}
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <p id="comment-text-{{ comment.id }}">
+                        <strong>{{ comment.author.username }}:</strong>
+                        {{ comment.content }}
+                        ({{ comment.created_at|date:"Y-m-d H:i" }})
+                    </p>
+
+                    {% if comment.author == request.user %}
+                        <button class="edit-btn"
+                            data-comment-id="{{ comment.id }}"
+                            data-content="{{ comment.content|escapejs }}">
+                            Edit
+                        </button>
+                        <a href="{% url 'delete_comment' comment.id %}">Delete</a>
+
+                        <form id="edit-form-{{ comment.id }}" action="{% url 'edit_comment' comment.id %}" method="POST" style="display: none;">
+                            {% csrf_token %}
+                            <textarea id="edit-content-{{ comment.id }}" name="content" rows="3"></textarea>
+                            <button type="submit">Confirm</button>
+                            <button type="button" class="cancel-btn" data-comment-id="{{ comment.id }}">Cancel</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No comments yet.</p>
+    {% endif %}
+
+    <hr>
+
+    {% if can_add_comment %}
+        <h3>Add a Comment</h3>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Add Comment</button>
+        </form>
+    {% else %}
+        <p><em>You do not have permission to add comments to this task.</em></p>
+    {% endif %}
+
+    <hr>
+
+    {% if project %}
+        <a href="{% url 'project_task_list' project.id %}">← Back to Project</a>
+    {% endif %}
+    <a href="{% url 'task_list' %}">← Back to Task List</a>
+
+    {% if task.project is None %}
+        {% if task.assigned_to == request.user %}
+            <a href="{% url 'edit_task' task.id %}" class="button"> Edit Task</a>
+        {% endif %}
+    {% else %}
+        {% if project_permissions|get_item:task.project.id and "EDIT_TASKS" in project_permissions|get_item:task.project.id %}
+            <a href="{% url 'edit_task' task.id %}" class="button"> Edit Task</a>
+        {% endif %}
+    {% endif %}
+
+    <script src="{% static 'js/edit_comments.js' %}" defer></script>
 </body>
 </html>

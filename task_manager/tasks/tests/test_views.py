@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
+from tasks.models import Task, Project, ProjectMembership, ProjectRole, Permission, RolePermission
 
 class UserRegistrationTest(TestCase):
     def test_registration_form_valid_data(self):
@@ -72,7 +73,6 @@ class UserLoginTest(TestCase):
 
 
 
-from tasks.models import Task, Project, ProjectMembership, Role, Permission, RolePermission
 
 
 
@@ -85,10 +85,10 @@ class TaskViewsTest(TestCase):
 
 
         self.project = Project.objects.create(name="Test Project", owner=self.user)
-        self.role = Role.objects.create(name="Manager")
+        self.role = ProjectRole.objects.create(name="Manager")
 
         create_task_perm = Permission.objects.get_or_create(name="CREATE_TASK")[0]
-        edit_task_perm = Permission.objects.get_or_create(name="EDIT_TASKS")[0]
+        edit_task_perm = Permission.objects.get_or_create(name="EDIT_TASK")[0]
         delete_task_perm = Permission.objects.get_or_create(name="DELETE_TASK")[0]
         assign_task_perm = Permission.objects.get_or_create(name="ASSIGN_TASK")[0]
 

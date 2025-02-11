@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from tasks.models import Task, Comment, TaskStatus
 from datetime import date
-from tasks.models import Project, Role, ProjectMembership
+from tasks.models import Project, ProjectRole, ProjectMembership
 
 
 class TaskModelTest(TestCase):
@@ -71,8 +71,8 @@ class ProjectTest(TestCase):
     @classmethod
     def setUpTestData(cls):
 
-        cls.owner_role = Role.objects.create(id=99, name="test")
-        cls.worker_role = Role.objects.create(id=98, name="test2")
+        cls.owner_role = ProjectRole.objects.create(id=99, name="test")
+        cls.worker_role = ProjectRole.objects.create(id=98, name="test2")
 
 
         cls.owner = User.objects.create_user(username="owner", password="password")
@@ -105,3 +105,4 @@ class ProjectTest(TestCase):
 
         self.assertIn(owner_membership.role.name, ['test'])
         self.assertNotIn(worker_membership.role.name, ['test'])
+
